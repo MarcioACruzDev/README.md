@@ -1,6 +1,5 @@
 # Laboratório de Segurança: Testes de Autenticação com Kali Linux e Medusa
 
-> Conversão do relatório em PDF para um repositório Git em Markdown, com imagens organizadas para publicação no GitHub.
 
 ## Visão geral
 
