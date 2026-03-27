@@ -1,1 +1,302 @@
+# 🛡️ Simulação Segura de Malware em Python
+
+**Autor:** Márcio Amâncio da Cruz
+**Área:** Cibersegurança | Laboratório Prático
+**Data:** Março/2026
+
+---
+
+# 📌 1. Introdução
+
+A crescente sofisticação das ameaças digitais exige que profissionais de segurança compreendam, na prática, como funcionam os principais tipos de malware. Entre eles, destacam-se:
+
+* **Ransomware**: responsável por indisponibilizar dados mediante criptografia.
+* **Keyloggers**: utilizados para captura de informações sensíveis digitadas por usuários.
+
+Este projeto tem como objetivo simular o comportamento dessas ameaças em um **ambiente controlado e seguro**, permitindo aprendizado prático sem riscos operacionais ou legais.
+
+---
+
+# 🎯 2. Objetivos
+
+## 2.1 Objetivo Geral
+
+Desenvolver um laboratório prático em Python para simular comportamentos de malware de forma segura e controlada.
+
+## 2.2 Objetivos Específicos
+
+* Compreender o funcionamento básico de ransomware
+* Simular captura de entradas (sem uso de keylogger real)
+* Identificar vetores de ataque e vulnerabilidades
+* Aplicar boas práticas de defesa e prevenção
+* Documentar o projeto como portfólio técnico
+
+---
+
+# 🧪 3. Metodologia
+
+O projeto foi desenvolvido utilizando:
+
+* **Python 3**
+* Estrutura modular
+* Execução local (sem rede externa)
+* Ambiente isolado (diretório de laboratório)
+
+### Princípios de Segurança Aplicados
+
+* Não capturar dados reais do sistema
+* Não acessar arquivos fora do ambiente de teste
+* Não executar processos ocultos
+* Não realizar envio de dados externos
+
+---
+
+# 📁 4. Estrutura do Projeto
+
+```bash
+malware-lab-safe/
+├─ README.md
+├─ requirements.txt
+├─ src/
+│  ├─ ransomware_sim.py
+│  ├─ keylogger_sim.py
+├─ lab_data/
+│  ├─ samples/
+│  └─ logs/
+└─ docs/
+   └─ defesa_e_prevencao.md
+```
+
+---
+
+# 🔐 5. Ransomware Simulado
+
+## 📌 Funcionamento
+
+O script executa as seguintes ações:
+
+1. Cria arquivos de teste
+2. Aplica transformação reversível (simulação de criptografia)
+3. Renomeia arquivos
+4. Gera nota de resgate fictícia
+5. Permite restauração dos arquivos
+
+---
+
+## 💻 Código: ransomware_sim.py
+
+```python
+from pathlib import Path
+import os
+
+LAB_DIR = Path("lab_data/samples")
+RANSOM_NOTE = LAB_DIR / "LEIA-ME-RESGATE.txt"
+KEY_FILE = LAB_DIR / ".lab_key"
+TARGET_EXTENSIONS = [".txt", ".md", ".csv"]
+ENCRYPTED_EXTENSION = ".lablocked"
+
+
+def ensure_lab_environment():
+    LAB_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def create_test_files():
+    ensure_lab_environment()
+
+    files = {
+        "relatorio.txt": "Relatório de teste.",
+        "clientes.csv": "id,nome\n1,Ana\n2,Caio",
+        "notas.md": "# Notas de laboratório"
+    }
+
+    for filename, content in files.items():
+        file_path = LAB_DIR / filename
+        file_path.write_text(content, encoding="utf-8")
+
+    print("[OK] Arquivos criados.")
+
+
+def generate_key():
+    key = os.urandom(1)
+    KEY_FILE.write_bytes(key)
+    return key
+
+
+def load_key():
+    return KEY_FILE.read_bytes()
+
+
+def xor_transform(data, key):
+    return bytes(b ^ key[0] for b in data)
+
+
+def encrypt_files():
+    key = generate_key()
+
+    for file_path in LAB_DIR.iterdir():
+        if file_path.suffix in TARGET_EXTENSIONS:
+            data = file_path.read_bytes()
+            encrypted = xor_transform(data, key)
+
+            new_path = file_path.with_suffix(file_path.suffix + ENCRYPTED_EXTENSION)
+            new_path.write_bytes(encrypted)
+            file_path.unlink()
+
+    RANSOM_NOTE.write_text("Simulação de ransomware - ambiente seguro")
+
+
+def decrypt_files():
+    key = load_key()
+
+    for file_path in LAB_DIR.iterdir():
+        if file_path.name.endswith(ENCRYPTED_EXTENSION):
+            data = file_path.read_bytes()
+            decrypted = xor_transform(data, key)
+
+            original_name = file_path.name.replace(ENCRYPTED_EXTENSION, "")
+            restored = LAB_DIR / original_name
+            restored.write_bytes(decrypted)
+            file_path.unlink()
+```
+
+---
+
+# ⌨️ 6. Captura Simulada (Keylogger Educacional)
+
+## 📌 Importante
+
+Este módulo **não captura teclas do sistema operacional**.
+Ele apenas registra entradas digitadas dentro do próprio programa.
+
+---
+
+## 💻 Código: keylogger_sim.py
+
+```python
+from pathlib import Path
+from datetime import datetime
+
+LOG_FILE = Path("lab_data/logs/log.txt")
+
+
+def log(text):
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(LOG_FILE, "a") as f:
+        f.write(f"{datetime.now()} - {text}\n")
+
+
+def run():
+    print("Digite algo (ou 'sair'):")
+
+    while True:
+        text = input("> ")
+        if text == "sair":
+            break
+
+        log(text)
+        print("Registrado.")
+
+
+if __name__ == "__main__":
+    run()
+```
+
+---
+
+# 🛡️ 7. Defesa e Prevenção
+
+## 🔒 Principais Medidas
+
+### ✔️ Antivírus / EDR
+
+* Detecta comportamento suspeito
+* Monitora processos
+
+### ✔️ Firewall
+
+* Bloqueia conexões não autorizadas
+
+### ✔️ Backup
+
+* Essencial contra ransomware
+* Preferencialmente offline
+
+### ✔️ Atualizações
+
+* Corrigem vulnerabilidades exploráveis
+
+### ✔️ Princípio do menor privilégio
+
+* Reduz impacto de ataques
+
+### ✔️ Conscientização do usuário
+
+* Evita phishing e engenharia social
+
+---
+
+## 🚨 Indicadores de Comprometimento
+
+### Ransomware
+
+* Arquivos renomeados
+* Extensões desconhecidas
+* Nota de resgate
+
+### Captura indevida
+
+* Logs suspeitos
+* Processos desconhecidos
+* Inicialização automática
+
+---
+
+# 🧠 8. Reflexão Técnica
+
+Este projeto demonstrou que mesmo implementações simples podem simular impactos reais de malware, como indisponibilidade de arquivos e registro de entradas do usuário.
+
+Além disso, reforçou que:
+
+* A maior vulnerabilidade muitas vezes é humana
+* A prevenção depende de múltiplas camadas
+* Backup é a principal defesa contra ransomware
+* Monitoramento contínuo é essencial
+
+A abordagem segura adotada garantiu que o estudo permanecesse ético e controlado.
+
+---
+
+# 🚀 9. Execução do Projeto
+
+```bash
+python src/ransomware_sim.py
+python src/keylogger_sim.py
+```
+
+---
+
+# ⚠️ 10. Aviso Ético
+
+Este projeto foi desenvolvido exclusivamente para fins educacionais.
+
+❌ Não contém:
+
+* keylogger real
+* técnicas de evasão
+* envio de dados
+* execução oculta
+
+✔️ Todo comportamento está restrito ao ambiente de laboratório.
+
+---
+
+# 📌 11. Conclusão
+
+A simulação permitiu compreender, na prática, como funcionam ameaças modernas, reforçando a importância de:
+
+* boas práticas de segurança
+* defesa em camadas
+* educação do usuário
+* monitoramento contínuo
+
 
